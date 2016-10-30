@@ -1,0 +1,34 @@
+# Description: Programs for handling passwords in a secure way
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter06/shadow.html
+# Maintainer: 
+
+
+NAME=shadow
+VERSION=4.1.4.2
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="http://pkg-shadow.alioth.debian.org/releases/${NAME}-${VERSION}.tar.bz2"
+PATCHES="shadow.patch"
+FILES="config.cache"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	process_patches
+	copy_files
+
+	./configure --prefix=${TOOLCHAIN_DIR} --sbindir=${TOOLCHAIN_DIR} \
+		--sysroot=${CLFS_DIR} --disable-shared			\
+		--without-libpam --without-audit --without-selinux	\
+		--program-prefix=${CLFS_TARGET}- --without-nscd		\
+		--cache-file=config.cache --host=${CLFS_HOST}
+
+	cp config.h{,.orig}
+	sed "/PASSWD_PROGRAM/s/passwd/${CLFS_TARGET}-&/" config.h.orig >config.h
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

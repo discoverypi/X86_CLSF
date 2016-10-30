@@ -1,0 +1,34 @@
+# Description: Taglib is a library used for reading, writing and manipulating audio file tags and is used by applications such as Amarok and VLC. 
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/multimedia/taglib.html
+# Maintainer:
+
+
+NAME=taglib
+VERSION=1.9.1
+
+
+DEPENDS=""
+SOURCES="https://github.com/taglib/taglib/releases/download/v1.9.1/taglib-1.9.1.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	export CPPFLAGS="$CPPFLAGS -I${CLFS_DIR}/usr/include"
+	export CXXFLAGS="$CXXFLAGS -I${CLFS_DIR}/usr/include"
+	export LD_LIBRARY_PATH="${TOOLCHAIN_DIR}/lib:/tools/${CLFS_HOST}/lib64"
+	mkdir build
+	cd build
+	cp ../../../../CMakeCache.txt .
+	cmake -DCMAKE_INSTALL_PREFIX=/usr \
+	      -DCMAKE_BUILD_TYPE=Release ..
+	cp ../../../../CMakeCache.txt .
+	make
+	make DESTDIR=${PKG} install
+
+
+}

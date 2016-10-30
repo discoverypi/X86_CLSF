@@ -1,0 +1,27 @@
+# Description: The International Components for Unicode (ICU) package is a mature, widely used set of C/C++ libraries providing Unicode and Globalization support for software applications. ICU is widely portable and gives applications the same results on all platforms. 
+# URL: http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz
+# Maintainer:
+
+
+NAME=icu
+VERSION=55.1
+HOST_PKG=1
+NO_DELETE=1
+
+
+DEPENDS=""
+SOURCES="http://download.icu-project.org/files/icu4c/55.1/icu4c-55_1-src.tgz"
+
+
+pkgmain() {
+	tar -xzf icu4c-55_1-src.tgz
+	cd icu/source
+	
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_HOST}		\
+		--prefix=${TOOLCHAIN_DIR} 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

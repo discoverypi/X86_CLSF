@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# /etc/rc.d/dbus: start/stop dbus
+#
+
+case $1 in
+start)
+        # create pid directory and machine-id file
+        if [ ! -d /var/run/dbus ]; then
+          mkdir -p /var/run/dbus
+          chown messagebus /var/run/dbus
+          chgrp messagebus /var/run/dbus
+        fi
+        /usr/bin/dbus-uuidgen --ensure
+        exec /usr/bin/dbus-daemon --fork --system
+
+        ;;
+stop)
+        exec kill -USR1 1
+        exec rm -f /var/run/messagebus.pid
+
+
+        ;;
+restart)
+        $0 stop
+        $0 start
+        ;;
+*)
+        echo "usage: $0 [start|stop|restart]"
+        ;;
+esac
+
+# End of file

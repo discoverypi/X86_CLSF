@@ -1,0 +1,24 @@
+# Description: Tools that provides a framework to produce multi-lingual messages
+# URL: http://www.gnu.org/software/gettext/
+# Maintainer: 
+
+
+NAME=gettext
+VERSION=0.18.3
+HOST_PKG=1
+
+SOURCES="http://ftp.gnu.org/pub/gnu/${NAME}/${NAME}-${VERSION}.tar.gz"
+PATCHES="gettext-autopoint-reloc.patch gettext-autopoint-intl.patch"
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+	process_patches
+
+	./configure --prefix=${TOOLCHAIN_DIR} \
+		--disable-java --without-emacs	--disable-rpath 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}
+

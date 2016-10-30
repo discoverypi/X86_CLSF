@@ -1,0 +1,24 @@
+# Description: Flex is a tool for generating scanners. A scanner, sometimes called a tokenizer, is a program which recognizes lexical patterns in text. The flex program reads user-specified input files, or its standard input if no file names are given, for a description of a scanner to generate. The description is in the form of pairs of regular expressions and C code, called rules. Flex generates a C source file named, "lex.yy.c", which defines the function yylex(). The file "lex.yy.c" can be compiled and linked to produce an executable. When the executable is run, it analyzes its input for occurrences of text matching the regular expressions for each rule. Whenever it finds a match, it executes the corresponding C code.
+# URL: http://flex.sourceforge.net/
+# Maintainer: 
+
+
+NAME=flex
+VERSION=2.5.39
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://prdownloads.sourceforge.net/flex/flex-2.5.39.tar.bz2"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	sed -i -e '/test-bison/d' tests/Makefile.in
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_HOST} 	\
+		--prefix=${TOOLCHAIN_DIR}
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

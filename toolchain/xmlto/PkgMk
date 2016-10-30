@@ -1,0 +1,24 @@
+# Description: a front-end to an XSL toolchain
+# URL: http://www.paldo.org/index.php?section=packages&page=main&releaseid=9702
+# Maintainer:
+
+
+NAME=xmlto
+VERSION=0.0.26
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="http://www.paldo.org/paldo/sources/xmlto/xmlto-0.0.26.tar.bz2"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=${TOOLCHAIN_DIR}
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

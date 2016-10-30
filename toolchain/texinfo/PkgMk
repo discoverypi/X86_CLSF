@@ -1,0 +1,22 @@
+# Description: The Texinfo package contains programs for reading, writing, and converting info pages. 
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/texinfo.html
+# Maintainer: 
+
+
+NAME=texinfo
+VERSION=5.2
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/texinfo/texinfo-5.2.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	export LD_LIBRARY_PATH="/tools/x86_64-cross-linux-gnu/lib64:/toolsx/lib"
+
+
+	PKG_CONFIG= ./configure --prefix=${TOOLCHAIN_DIR}
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

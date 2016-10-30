@@ -1,0 +1,23 @@
+# Description: Typesetting package which reads plain text mixed with formatting
+#       commands and produces formatted output
+# URL: http://www.gnu.org/software/groff/
+# Maintainer: 
+
+
+NAME=groff
+VERSION=1.22.2
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="ftp://ftp.gnu.org/gnu/${NAME}/${NAME}-${VERSION}.tar.gz"
+
+pkgmain() {
+    cd ${NAME}-${VERSION}
+    #export LD_LIBRARY_PATH=/tools/x86_64-cross-linux-gnu/lib64:$LD_LIBRARY_PATH
+
+    PAGE=A4 ./configure --prefix=${TOOLCHAIN_DIR} --without-x 
+
+    make -j${NR_JOBS}
+    make DESTDIR=${PKG} install
+}

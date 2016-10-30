@@ -1,0 +1,31 @@
+# Description: CMake was created by Kitware in response to the need for a powerful, cross-platform build environment for open-source projects such as ITK and VTK. In addition to leading the development of this popular tool, Kitware also offers commercial consulting, support and training to help your organization effectively use CMake and the entire Kitware quality software process.
+# URL: http://www.cmake.org/
+# Maintainer: 
+
+
+NAME=cmake
+VERSION=3.3.1
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="http://www.cmake.org/files/v3.3/cmake-3.3.1.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${TOOLCHAIN_DIR}/lib" 
+	PATH=/toolsx/bin:$PATH
+	mv ${TOOLCHAIN_DIR}/bin/bsdtar ${TOOLCHAIN_DIR}/bin/org.bsdtar
+
+        LDFLAGS="-Wl,-rpath-link,${TOOLCHAIN_DIR}/lib"          \
+        CPPFLAGS="-I${TOOLCHAIN_DIR}/include/libxml2 -I/tools/include -L${TOOLCHAIN_DIR}/lib $CPPFLAGS" \
+	./configure --prefix=${TOOLCHAIN_DIR} \
+		    --no-system-jsoncpp \
+		    --mandir=${TOOLCHAIN_DIR}/share/man \
+		    --docdir=${TOOLCHAIN_DIR}/share/doc/cmake-3.3.1 \
+		--system-libs
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

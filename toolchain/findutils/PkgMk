@@ -1,0 +1,21 @@
+# Description: The Findutils package contains programs to find files. These programs are provided to recursively search through a directory tree and to create, maintain, and search a database (often faster than the recursive find, but unreliable if the database has not been recently updated). 
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/findutils.html
+# Maintainer: 
+
+
+NAME=findutils
+VERSION=4.4.2
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/findutils/findutils-4.4.2.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR} 
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

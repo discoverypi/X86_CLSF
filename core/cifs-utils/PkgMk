@@ -1,0 +1,31 @@
+# Description: The cifs-utils provides a means for mounting SMB/CIFS shares on a Linux system. 
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/basicnet/cifsutils.html
+# Maintainer:
+
+
+NAME=cifs-utils
+VERSION=6.4
+
+
+DEPENDS=""
+SOURCES="https://ftp.samba.org/pub/linux-cifs/cifs-utils/cifs-utils-6.4.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	CFLAGS="$CLFAGS -I${CLFS_DIR}/usr/include -I${TOOLCHAIN_DIR}/${CLFS_TARGET}/include"			\
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr  \
+		--disable-pam \
+            	--disable-systemd
+	cp ../../../config.h .
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

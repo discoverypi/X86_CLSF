@@ -1,0 +1,47 @@
+ntpdate 0.north-america.pool.ntp.org
+chmod 777 /dev/vchiq
+if [ -f /.postpkg ]; then
+	ldconfig
+	libtool --finish /usr/lib
+	mkdir /home/pi
+	mkdir /home/pi/Mail
+	touch /home/pi/Mail/inbox
+	chown -R pi:pi /home/pi
+	mkdir /Pi
+	chown pi:pi /Pi
+	cd /Pi
+	tar -xf /usr/share/pios/postpkg.tar
+	PATH=/Pi/bin:$PATH
+	cd /Pi/core/bash
+	install.sh bash-4.2-cross-pkg.tar.bz2
+	cd /Pi/core/libtool
+	install.sh libtool-2.4.2-cross-pkg.tar.bz2
+	cd /Pi/core/autofs
+	install.sh autofs-5.1.1-cross-pkg.tar.bz2
+	cd /Pi/core/perl
+	install.sh perl-5.24.0-cross-pkg.tar.bz2
+	cd /Pi/core/cmake
+	install.sh cmake-3.6.0-cross-pkg.tar.bz2
+	cd /Pi/core/mysql
+	install.sh mysql-5.6.16-cross-pkg.tar.bz2
+	cd /Pi/core/dovecot
+	install.sh dovecot-2.2.25-cross-pkg.tar.bz2
+	cd /Pi/core/apr
+	install.sh apr-1.5.2-cross-pkg.tar.bz2
+	cd /Pi/core/apr-util
+	install.sh apr-util-1.5.4-cross-pkg.tar.bz2
+	cd /Pi/core/bind
+	install.sh bind-9.10.4-P2-cross-pkg.tar.bz2
+	cd /Pi/core/httpd
+	install.sh httpd-2.4.23-cross-pkg.tar.bz2
+	cd /Pi/core/dcron
+	install.sh dcron-4.5-cross-pkg.tar.bz2
+	cd /Pi/core/mailx
+	install.sh heirloom-mailx-12.5-cross-pkg.tar.bz2
+	cd /Pi/core/procmail
+	build.sh
+	cd /Pi/core/sendmail
+	build.sh
+	rm /.postpkg
+fi
+/etc/rc.d/kodi start

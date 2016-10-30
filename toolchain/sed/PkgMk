@@ -1,0 +1,21 @@
+# Description: The Sed package contains a stream editor.
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/sed.html
+# Maintainer: 
+
+
+NAME=sed
+VERSION=4.2.2
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/sed/sed-4.2.2.tar.bz2"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	PKG_CONFIG= ./configure --prefix=${TOOLCHAIN_DIR}
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

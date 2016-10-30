@@ -1,0 +1,27 @@
+# Description: Secure communications library implementing the SSL, TLS and DTLS
+# protocols
+# URL: http://www.gnutls.org/
+# Maintainer: 
+
+
+NAME=gnutls
+VERSION=3.2.12
+HOST_PKG=1
+
+DEPENDS="libnettle"
+SOURCES="ftp://ftp.gnutls.org/gcrypt/${NAME}/v3.2/${NAME}-${VERSION}.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-$VERSION
+	PKG_CONFIG_PATH=/toolsx/lib/pkgconfig
+	PATH=/toolsx/bin:$PATH
+
+	CPPFLAGS="-I/toolsx/include -L${TOOLCHAIN_DIR}/lib $CPPFLAGS" \
+	./configure --prefix=${TOOLCHAIN_DIR} --build=${CLFS_HOST}	\
+		--host=${CLFS_HOST} PKG_CONFIG_PATH=/toolsx/lib/pkgconfig
+
+	make -j${NR_JOBS}
+	#fix_temporary_libtool_files
+	make DESTDIR=${PKG} install
+}

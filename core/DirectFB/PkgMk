@@ -1,0 +1,32 @@
+# Description: DirectFB is a graphics library on top of the Linux frame buffer device. It offers maximum hardware accelerated performance at a minimum of resource usage and overhead. 
+# URL: 
+# Maintainer:
+
+
+NAME=DirectFB
+VERSION=1.6.3
+
+
+DEPENDS=""
+SOURCES="http://pkgs.fedoraproject.org/repo/pkgs/directfb/DirectFB-1.6.3.tar.gz/641e8e999c017770da647f9b5b890906/DirectFB-1.6.3.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	export CPPFLAGS="$CPPFLAGS -I${CLFS_DIR}/usr/include"
+	EGL_CFLAGS="-I${CLFS_DIR}/opt/vc/include -I${CLFS_DIR}/opt/vc/include/interface/vcos/pthreads \
+	-I${CLFS_DIR}/opt/vc/include/interface/vmcs_host/linux" \
+	EGL_LIBS="-lEGL -lGLESv2 $LIBS -L${CLFS_DIR}/opt/vc/lib" \ 
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr \
+		--with-gfxdrivers=gles2
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

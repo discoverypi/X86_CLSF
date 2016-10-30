@@ -1,0 +1,31 @@
+# Description: The JasPer Project is an open-source initiative to provide a free software-based reference implementation of the JPEG-2000 codec.
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/general/jasper.html
+# Maintainer:
+
+
+NAME=jasper
+VERSION=1.900.1
+
+
+DEPENDS=""
+SOURCES="http://www.ece.uvic.ca/~mdadams/jasper/software/jasper-1.900.1.zip"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	unzip jasper-1.900.1.zip
+	cd ${NAME}-${VERSION}
+	export CPPFLAGS="$CPPFLAGS -I${CLFS_DIR}/usr/include"
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr \
+		--enable-shared  \
+            --disable-static 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

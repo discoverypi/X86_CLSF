@@ -1,0 +1,19 @@
+# Description: The Perl package contains the Practical Extraction and Report Language.
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/perl.html
+# Maintainer: 
+
+
+NAME=perl
+VERSION=5.20.2
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://www.cpan.org/src/5.0/perl-5.20.2.tar.bz2"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	sh Configure -des -Dprefix=${TOOLCHAIN_DIR} -Dlibs=-lm
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

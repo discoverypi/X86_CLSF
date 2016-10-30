@@ -1,0 +1,22 @@
+# Description: The Make package contains a program for compiling packages.
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/make.html
+# Maintainer: 
+
+
+NAME=make
+VERSION=3.82
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/make/make-3.82.tar.bz2"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR} \
+		--without-guile
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

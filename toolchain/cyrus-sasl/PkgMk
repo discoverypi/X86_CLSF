@@ -1,0 +1,31 @@
+# Description: The Cyrus SASL package contains a Simple Authentication and Security Layer, a method for adding authentication support to connection-based protocols. To use SASL, a protocol includes a command for identifying and authenticating a user to a server and for optionally negotiating protection of subsequent protocol interactions. If its use is negotiated, a security layer is inserted between the protocol and the connection.
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/postlfs/cyrus-sasl.html
+# Maintainer:
+
+
+NAME=cyrus-sasl
+VERSION=2.1.26
+HOST_PKG=1
+NO_DELETE=1
+
+
+DEPENDS=""
+SOURCES="ftp://ftp.cyrusimap.org/cyrus-sasl/cyrus-sasl-2.1.26.tar.gz"
+PATCHES="cyrus-sasl-2.1.26-fixes-3.patch"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	process_patches
+	autoreconf -fi
+	./configure --build=${CLFS_HOST} --host=${CLFS_HOST}		\
+		--prefix=${TOOLCHAIN_DIR} \
+		--sysconfdir=${TOOLCHAIN_DIR}/etc    \
+            --enable-auth-sasldb \
+            --with-dbpath=${TOOLCHAIN_DIR}/var/lib/sasl/sasldb2 \
+            --with-saslauthd=${TOOLCHAIN_DIR}/var/run/saslauthd 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

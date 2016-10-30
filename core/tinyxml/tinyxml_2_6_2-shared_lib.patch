@@ -1,0 +1,150 @@
+Origin:                  http://www.intestinate.com/pilfs/beyond.html#kodi
+
+diff -ur tinyxml-orig/Makefile tinyxml/Makefile
+--- tinyxml-orig/Makefile	2011-05-15 03:24:57.000000000 +0100
++++ tinyxml/Makefile	2015-02-16 19:10:57.500873922 +0000
+@@ -15,18 +15,20 @@
+ 
+ # TINYXML_USE_STL can be used to turn on STL support. NO, then STL
+ # will not be used. YES will include the STL files.
+-TINYXML_USE_STL := NO
++TINYXML_USE_STL := YES
+ 
+ #****************************************************************************
+ 
++PREFIX := /usr
++
+ CC     := gcc
+ CXX    := g++
+ LD     := g++
+ AR     := ar rc
+ RANLIB := ranlib
+ 
+-DEBUG_CFLAGS     := -Wall -Wno-format -g -DDEBUG
+-RELEASE_CFLAGS   := -Wall -Wno-unknown-pragmas -Wno-format -O3
++DEBUG_CFLAGS     := -Wall -Wno-format -g -DDEBUG -fPIC
++RELEASE_CFLAGS   := -Wall -Wno-unknown-pragmas -Wno-format -O3 -fPIC
+ 
+ LIBS		 :=
+ 
+@@ -34,7 +36,7 @@
+ RELEASE_CXXFLAGS := ${RELEASE_CFLAGS}
+ 
+ DEBUG_LDFLAGS    := -g
+-RELEASE_LDFLAGS  :=
++RELEASE_LDFLAGS  := -shared
+ 
+ ifeq (YES, ${DEBUG})
+    CFLAGS       := ${DEBUG_CFLAGS}
+@@ -83,8 +85,9 @@
+ 
+ OUTPUT := xmltest
+ 
+-all: ${OUTPUT}
++SHLIB := libtinyxml.so.2.6.2
+ 
++all: ${OUTPUT} ${SHLIB}
+ 
+ #****************************************************************************
+ # Source files
+@@ -102,7 +105,10 @@
+ #****************************************************************************
+ 
+ ${OUTPUT}: ${OBJS}
+-	${LD} -o $@ ${LDFLAGS} ${OBJS} ${LIBS} ${EXTRA_LIBS}
++	${CXX} -o $@ ${LDFLAGS} ${OBJS} ${LIBS} ${EXTRA_LIBS}
++
++${SHLIB}: ${OBJS}
++	${CXX} ${LDFLAGS} -o ${SHLIB} ${OBJS}
+ 
+ #****************************************************************************
+ # common rules
+@@ -119,11 +125,18 @@
+ 	bash makedistlinux
+ 
+ clean:
+-	-rm -f core ${OBJS} ${OUTPUT}
++	-rm -f core ${OBJS} ${OUTPUT} ${SHLIB}
+ 
+ depend:
+ 	#makedepend ${INCS} ${SRCS}
+ 
++install:
++	install -m 0644 tinyxml.h $(PREFIX)/include/
++	install -m 0644 tinystr.h $(PREFIX)/include/
++	install -m 0755 ${SHLIB} $(PREFIX)/lib
++	ln -sf $(PREFIX)/lib/${SHLIB} $(PREFIX)/lib/libtinyxml.so
++	ln -sf $(PREFIX)/lib/${SHLIB} $(PREFIX)/lib/libtinyxml.so.0
++	
+ tinyxml.o: tinyxml.h tinystr.h
+ tinyxmlparser.o: tinyxml.h tinystr.h
+ xmltest.o: tinyxml.h tinystr.h
+diff -ur tinyxml-orig/tinyxml.cpp tinyxml/tinyxml.cpp
+--- tinyxml-orig/tinyxml.cpp	2011-05-15 03:24:57.000000000 +0100
++++ tinyxml/tinyxml.cpp	2015-02-16 19:10:24.780943914 +0000
+@@ -57,30 +57,7 @@
+ 	{
+ 		unsigned char c = (unsigned char) str[i];
+ 
+-		if (    c == '&' 
+-		     && i < ( (int)str.length() - 2 )
+-			 && str[i+1] == '#'
+-			 && str[i+2] == 'x' )
+-		{
+-			// Hexadecimal character reference.
+-			// Pass through unchanged.
+-			// &#xA9;	-- copyright symbol, for example.
+-			//
+-			// The -1 is a bug fix from Rob Laveaux. It keeps
+-			// an overflow from happening if there is no ';'.
+-			// There are actually 2 ways to exit this loop -
+-			// while fails (error case) and break (semicolon found).
+-			// However, there is no mechanism (currently) for
+-			// this function to return an error.
+-			while ( i<(int)str.length()-1 )
+-			{
+-				outString->append( str.c_str() + i, 1 );
+-				++i;
+-				if ( str[i] == ';' )
+-					break;
+-			}
+-		}
+-		else if ( c == '&' )
++		if ( c == '&' )
+ 		{
+ 			outString->append( entity[0].str, entity[0].strLength );
+ 			++i;
+diff -ur tinyxml-orig/tinyxml.h tinyxml/tinyxml.h
+--- tinyxml-orig/tinyxml.h	2011-05-15 03:24:57.000000000 +0100
++++ tinyxml/tinyxml.h	2015-02-16 19:10:24.780943914 +0000
+@@ -26,6 +26,10 @@
+ #ifndef TINYXML_INCLUDED
+ #define TINYXML_INCLUDED
+ 
++#ifndef TIXML_USE_STL
++	#define TIXML_USE_STL
++#endif
++
+ #ifdef _MSC_VER
+ #pragma warning( push )
+ #pragma warning( disable : 4530 )
+diff -ur tinyxml-orig/xmltest.cpp tinyxml/xmltest.cpp
+--- tinyxml-orig/xmltest.cpp	2011-05-15 03:24:57.000000000 +0100
++++ tinyxml/xmltest.cpp	2015-02-16 19:10:24.790943893 +0000
+@@ -1366,6 +1366,16 @@
+ 		}*/
+ 	}
+ 
++	#ifdef TIXML_USE_STL
++	{
++		TiXmlDocument xml;
++		xml.Parse("<foo>foo&amp;#xa+bar</foo>");
++		std::string str;
++		str << xml;
++		XmlTest( "Entity escaping", "<foo>foo&amp;#xa+bar</foo>", str.c_str() );
++	}
++	#endif
++
+ 	/*  1417717 experiment
+ 	{
+ 		TiXmlDocument xml;

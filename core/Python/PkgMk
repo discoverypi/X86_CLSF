@@ -1,0 +1,46 @@
+# Description: The Python 2 package contains the Python development environment. It is useful for object-oriented programming, writing scripts, prototyping large programs or developing entire applications. This version is for backward compatibility with other dependent packages.
+# URL:https://www.python.org/ftp/python/2.7.10/Python-2.7.10.tar.xz
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=Python
+VERSION=2.7.2
+
+
+DEPENDS="libffi"
+SOURCES="https://www.python.org/ftp/python/2.7.2/Python-2.7.2.tar.xz"
+PATCHES="Python-2.7.2-xcompile.patch"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	process_patches
+	LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/tools/lib64:/tools/lib"
+	PATH=/toolsx/bin:$PATH
+	CFLAGS="$CFLAGS -fdata-sections -ffunction-sections -I${CLFS_DIR}/usr/include" \
+	LDFLAGS="$LDFLAGS -L${CLFS_DIR}/usr/lib" \
+	./configure --prefix=/usr       \
+	    --build=${CLFS_HOST} \
+	    --host=${CLFS_TARGET} \
+            --enable-shared     \
+            --with-system-expat \
+		--with-ssl	\
+            --enable-unicode=ucs4 \
+		ac_cv_file__dev_ptmx=no \
+		ac_cv_file__dev_ptc=no \
+		--disable-ipv6
+
+	cp ../../../setup.py .
+	make -j${NR_JOBS} BUILDARCH=${CLFS_HOST} HOSTARCH=${CLFS_TARGET} BLDSHARED="${CLFS_TARGET}-gcc -shared" CROSS_COMPILE=${CLFS_TARGET}- CROSS_COMPILE_TARGET=yes HOSTPYTHON=${TOOLCHAIN_DIR}/bin/python HOSTPGEN=${TOOLCHAIN_DIR}/bin/pgen
+read -p "Press [Enter] key to contunue"
+	#make DESTDIR=${PKG} BUILDARCH=${CLFS_HOST} HOSTARCH=${CLFS_TARGET} BLDSHARED="${CLFS_TARGET}-gcc -shared" CROSS_COMPILE=${CLFS_TARGET}- CROSS_COMPILE_TARGET=yes HOSTPYTHON=${TOOLCHAIN_DIR}/bin/python HOSTPGEN=${TOOLCHAIN_DIR}/bin/pgen install
+	PATH=$PATH make DESTDIR=${PKG} BUILDARCH=${CLFS_HOST} HOSTARCH=${CLFS_TARGET} BLDSHARED="${CLFS_TARGET}-gcc -shared" CROSS_COMPILE=${CLFS_TARGET}- CROSS_COMPILE_TARGET=yes HOSTPYTHON=${TOOLCHAIN_DIR}/bin/python HOSTPGEN=${TOOLCHAIN_DIR}/bin/pgen install
+
+	LD_LIBRARY_PATH="${TOOLCHAIN_DIR}/lib:/tools/${CLFS_HOST}/lib64"
+}
+

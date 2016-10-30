@@ -1,0 +1,20 @@
+# Description: The DejaGNU package contains a framework for testing other programs.
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/dejagnu.html
+# Maintainer: 
+
+
+NAME=dejagnu
+VERSION=1.5.2
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/dejagnu/dejagnu-1.5.2.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	PATH=/toolsx/bin:$PATH
+	./configure --prefix=${TOOLCHAIN_DIR} 
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

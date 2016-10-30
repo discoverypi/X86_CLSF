@@ -1,0 +1,21 @@
+# Description: The Patch package contains a program for modifying or creating files by applying a “patch” file typically created by the diff program. `
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/patch.html
+# Maintainer: 
+
+
+NAME=patch
+VERSION=2.7.4
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/patch/patch-2.7.4.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR} 
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

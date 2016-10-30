@@ -1,0 +1,241 @@
+# Description: C compiler
+# URL: http://preshing.com/20141119/how-to-build-a-gcc-cross-compiler/
+# Maintainer: 
+
+
+NAME=gcch
+VERSION=4.9.2
+HOST_PKG=1
+
+
+SOURCES="https://ftp.gnu.org/gnu/gcc/gcc-4.9.2/gcc-4.9.2.tar.gz"
+
+
+pkgmain() {
+	BINUTILS_VERSION=binutils-2.22
+        LINUX_VERSION=linux-3.19
+        GLIBC_VERSION=glibc-2.13
+        MPFR_VERSION=mpfr-3.1.2
+        GMP_VERSION=gmp-6.0.0a
+        MPC_VERSION=mpc-1.0.2
+        ISL_VERSION=isl-0.12.2
+        CLOOG_VERSION=cloog-0.18.1
+	GCC_VERSION=gcc-4.9.2
+
+	cd ..
+	rm -rf pkg
+	ln -s ${TOOLCHAIN_DIR} pkg
+	cd src
+
+	cd $GCC_VERSION
+        cd ..
+	if [ -d /Pi/hostsrc ]; then
+		cp /Pi/hostsrc/$BINUTILS_VERSION.tar.gz .
+		cp /Pi/hostsrc/linux-3.19.tar.xz .
+		cp /Pi/hostsrc/$GLIBC_VERSION.tar.xz .
+		cp /Pi/hostsrc/$MPFR_VERSION.tar.xz .
+		cp /Pi/hostsrc/$GMP_VERSION.tar.xz .
+		cp /Pi/hostsrc/$MPC_VERSION.tar.gz .
+		cp /Pi/hostsrc/$ISL_VERSION.tar.bz2 .
+		cp /Pi/hostsrc/$CLOOG_VERSION.tar.gz .
+		cp /Pi/hostsrc/glibc-ports-2.13.tar.gz .
+	else
+		wget -nc http://ftp.gnu.org/gnu/binutils/$BINUTILS_VERSION.tar.gz
+		wget -nc https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.19.tar.xz
+        	wget -nc https://ftp.gnu.org/gnu/glibc/$GLIBC_VERSION.tar.xz
+        	wget -nc https://ftp.gnu.org/gnu/mpfr/$MPFR_VERSION.tar.xz
+		wget -nc https://ftp.gnu.org/gnu/gmp/$GMP_VERSION.tar.xz
+		wget -nc https://ftp.gnu.org/gnu/mpc/$MPC_VERSION.tar.gz
+		wget -nc ftp://gcc.gnu.org/pub/gcc/infrastructure/$ISL_VERSION.tar.bz2
+		wget -nc ftp://gcc.gnu.org/pub/gcc/infrastructure/$CLOOG_VERSION.tar.gz
+		wget -nc https://ftp.gnu.org/gnu/glibc/glibc-ports-2.13.tar.gz
+	fi
+	#mv rpi-4.0.y rpi-4.0.y.tar.gz
+	#cp ../../*.tar.* .
+	#rm gcc-4.9.2-host-pkg.tar.bz2
+	#rm gcc-4.9.2.tar.gz
+
+	# Extract everything
+	for f in *.tar*; do tar xfk $f; done
+        
+        # Make symbolic links
+        cd $GCC_VERSION
+        ln -sf `ls -1d ../mpfr-*/` mpfr
+	ln -sf `ls -1d ../gmp-*/` gmp
+	ln -sf `ls -1d ../mpc-*/` mpc
+	ln -sf `ls -1d ../isl-*/` isl
+	ln -sf `ls -1d ../cloog-*/` cloog
+for file in \
+ $(find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h)
+do
+  cp -uv $file{,.orig}
+  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+      -e 's@/usr@/tools@g' $file.orig > $file
+  echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file
+  touch $file.orig
+done
+	sed -i '/k prot/agcc_cv_libc_provides_ssp=yes' gcc/configure
+        cd ..
+
+        cd $GLIBC_VERSION
+        ln -s ../glibc-ports-2.13 ports
+	sed -e '/ia32/s/^/1:/'  \
+    	-e '/SSE2/s/^1://' 	\
+    	-i  sysdeps/i386/i686/multiarch/mempcpy_chk.S
+        cd ..
+
+read -p "Press [Enter] key to start Install Binutils PASS1..."
+	# Install Binutils PASS1
+	mkdir build_binutils
+	cd build_binutils
+	../$BINUTILS_VERSION/configure --prefix=${TOOLCHAIN_DIR} \
+                --target=${CLFS_HOST}         			 \
+		--with-sysroot=${CLFS_DIR} 			 \
+		--with-lib-path=${TOOLCHAIN_DIR}/lib 		 \
+		--disable-werror 				 \
+		--disable-nls   				 \
+		--enable-plugins
+
+        make -j${NR_JOBS}
+	mkdir -v ${TOOLCHAIN_DIR}/lib
+	ln -sv lib ${TOOLCHAIN_DIR}/lib64
+        make install
+
+read -p "Press [Enter] key to start Install Linux Header..."
+	# Install Linux Header
+	cd ..
+	cd $LINUX_VERSION
+	make mrproper
+	make INSTALL_HDR_PATH=${TOOLCHAIN_DIR} headers_install
+
+read -p "Press [Enter] key to start Install GCC PASS1..."
+	cd ..
+        # Install GCC PASS1
+	mkdir build_gcc
+	cd build_gcc
+
+	../$GCC_VERSION/configure --prefix=${TOOLCHAIN_DIR} 	\
+		--target=${CLFS_HOST}                 		\
+		--with-sysroot=${CLFS_DIR}			\
+		--with-newlib                                   \
+		--without-headers                               \
+    		--with-local-prefix=${TOOLCHAIN_DIR}            \
+    		--with-native-system-header-dir=${TOOLCHAIN_DIR}/include   \
+		--enable-add-ons=nptl,ports			\
+    		--disable-nls                                   \
+    		--disable-shared                                \
+    		--disable-multilib                              \
+    		--disable-decimal-float                         \
+    		--disable-threads                               \
+    		--disable-libatomic                             \
+   		--disable-libgomp                               \
+    		--disable-libitm                                \
+    		--disable-libquadmath                           \
+    		--disable-libsanitizer                          \
+    		--disable-libssp                                \
+    		--disable-libvtv                                \
+    		--disable-libcilkrts                            \
+    		--disable-libstdc++-v3                          \
+		--enable-plugins				\
+    		--enable-languages=c,c++
+
+
+	make -j${NR_JOBS} 
+	make install
+	cd ..
+
+read -p "Press [Enter] key to start Install GLIBC Library..."
+	# Standard C Library Headers and Startup Files
+	mkdir build_glibc
+	cd build_glibc
+	../$GLIBC_VERSION/configure --prefix=${TOOLCHAIN_DIR}   \
+                --host=${CLFS_HOST}				\
+		--build=$(../glibc-2.13/scripts/config.guess)   \
+                --with-headers=${TOOLCHAIN_DIR}/include		\
+                --disable-multilib --disable-werror             \
+		--enable-add-ons=nptl,ports                     \
+		--enable-kernel=2.6.32                          \
+		--disable-profile                               \
+                libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes \
+		libc_cv_ctors_header=yes
+
+	make -j${NR_JOBS} 
+	make install
+
+
+read -p "Press [Enter] key to start Install G++ Library..."
+
+	# Compiler Support Library
+	echo "##### Install libgcc #########"
+	mkdir ../build_gcclib
+	cd ../build_gcclib
+	PATH=/tools/bin:$PATH
+	LD_LIBRARY_PATH="${TOOLCHAIN_DIR}/lib"				
+	CPPFLAGS="${CPPFLAGS} -I${TOOLCHAIN_DIR}/include"	
+	CXXFLAGS="${CXXFLAGS} -I${TOOLCHAIN_DIR}/include"	
+	CC=$CLFS_HOST-gcc           
+	CXX=$CLFS_HOST-g++                                
+	AR=$CLFS_HOST-ar                              
+	RANLIB=$CLFS_HOST-ranlib              
+	../gcc-4.9.2/libstdc++-v3/configure \
+    	--host=${CLFS_HOST}                 \
+    	--prefix=${TOOLCHAIN_DIR}           \
+    	--disable-multilib                  \
+    	--disable-shared                    \
+    	--disable-nls                       \
+    	--disable-libstdcxx-threads         \
+    	--disable-libstdcxx-pch             \
+    	--with-gxx-include-dir=/tools/${CLFS_HOST}/include/c++/4.9.2
+	make -j${NR_JOBS} 
+	make install
+
+read -p "Press [Enter] key to start Install Binutils PASS2..."
+
+       # Install Binutils PASS1
+        cd ..
+	rm -rf build_binutils
+	mkdir build_binutils
+	cd build_binutils
+	../$BINUTILS_VERSION/configure --prefix=${TOOLCHAIN_DIR} \
+                --target=${CLFS_HOST}         			 \
+		--with-sysroot=${CLFS_DIR} 			 \
+		--with-lib-path=${TOOLCHAIN_DIR}/lib 		 \
+		--disable-werror 				 \
+		--disable-nls   				 \
+		--enable-plugins
+
+        make -j${NR_JOBS}
+        make install
+
+
+read -p "Press [Enter] key to start Install GCC PASS2..."
+	cd ..
+        # Install GCC PASS1
+        cd $GCC_VERSION
+	cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
+  `dirname $($CLFS_HOST-gcc -print-libgcc-file-name)`/include-fixed/limits.h
+        cd ..
+        rm -rf build_gcc
+	mkdir build_gcc
+	cd build_gcc
+
+	../$GCC_VERSION/configure --prefix=${TOOLCHAIN_DIR} 	\
+		--target=${CLFS_HOST}                 		\
+		--with-sysroot=${CLFS_DIR}			\
+    		--with-local-prefix=${TOOLCHAIN_DIR}            \
+    		--with-native-system-header-dir=${TOOLCHAIN_DIR}/include   \
+		--enable-add-ons=nptl,ports			\
+		--enable-plugins				\
+		--enable-languages=c,c++                        \
+    		--disable-libstdcxx-pch                         \
+    		--disable-multilib                              \
+    		--disable-bootstrap                             \
+    		--disable-libgomp
+
+	make -j${NR_JOBS}
+	make install
+}

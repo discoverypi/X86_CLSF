@@ -1,0 +1,28 @@
+# Description: Libxml2 is the XML C parser and toolkit developed for the Gnome project (but usable outside of the Gnome platform)
+# URL: http://www.xmlsoft.org/
+# Maintainer: 
+
+
+NAME=libxml2
+VERSION=2.9.2
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="ftp://xmlsoft.org/libxml2/libxml2-2.9.2.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	sed \
+  -e /xmlInitializeCatalog/d \
+  -e 's/((ent->checked =.*&&/(((ent->checked == 0) ||\
+          ((ent->children == NULL) \&\& (ctxt->options \& XML_PARSE_NOENT))) \&\&/' \
+  -i parser.c
+	PATH=${TOOLCHAIN_DIR}/bin:$PATH
+
+	./configure --prefix=${TOOLCHAIN_DIR} --disable-static --with-history \
+		LZMA_CFLAGS="-I${TOOLCHAIN_DIR}/include -L${TOOLCHAIN_DIR}/lib" \
+		--with-python=no
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

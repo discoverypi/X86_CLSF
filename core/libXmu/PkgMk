@@ -1,0 +1,28 @@
+# Description: X Miscellaneous Utilities library
+# URL: http://www.paldo.org/index-section-packages-page-main-releaseid-4996.html
+# Maintainer:
+
+
+NAME=libXmu
+VERSION=1.1.2
+
+
+DEPENDS=""
+SOURCES="http://www.paldo.org/paldo/sources/xmu/libXmu-1.1.2.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	export CPPFLAGS="$CPPFLAGS -I${CLFS_DIR}/usr/include"
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr  --disable-static
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

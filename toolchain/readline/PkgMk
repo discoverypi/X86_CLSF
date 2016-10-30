@@ -1,0 +1,26 @@
+# Description: Set of functions for use by applications that allow users to edit
+#		command lines as they are typed in
+# URL: ftp://ftp.cwru.edu/pub/bash/${NAME}-${VERSION}.tar.gz
+# Maintainer: 
+
+
+NAME=readline
+VERSION=6.2
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/${NAME}/${NAME}-${VERSION}.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	patch_unknown_target support/config.sub
+
+	./configure 		\
+		--prefix=${TOOLCHAIN_DIR} 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

@@ -1,0 +1,28 @@
+# Description: Authorization Protocol for X
+# URL: http://www.paldo.org/index-section-packages-page-main-releaseid-4276.html
+# Maintainer:
+
+
+NAME=libXau
+VERSION=1.0.8
+
+
+DEPENDS=""
+SOURCES="http://www.paldo.org/paldo/sources/xau/libXau-1.0.8.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	export CPPFLAGS="$CPPFLAGS -I${CLFS_DIR}/usr/include"
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr --disable-static 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

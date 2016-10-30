@@ -1,0 +1,22 @@
+# Description: The Xz package contains programs for compressing and decompressing files. It provides capabilities for the lzma and the newer xz compression formats. Compressing text files with xz yields a better compression percentage than with the traditional gzip or bzip2 commands. 
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/xz.html
+# Maintainer: 
+
+
+NAME=xz
+VERSION=5.2.1
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://tukaani.org/xz/xz-5.2.1.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+	./configure --prefix=${TOOLCHAIN_DIR} \
+		    --disable-static --host=${CLFS_HOST}
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

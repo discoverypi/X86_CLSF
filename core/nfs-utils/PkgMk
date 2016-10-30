@@ -1,0 +1,37 @@
+# Description: The NFS Utilities package contains the userspace server and client tools necessary to use the kernel's NFS abilities. NFS is a protocol that allows sharing file systems over the network. 
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/basicnet/nfs-utils.html
+# Maintainer:
+
+
+NAME=nfs-utils
+VERSION=1.3.2
+
+
+DEPENDS=""
+SOURCES="http://downloads.sourceforge.net/nfs/nfs-utils-1.3.2.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	sed -i "/daemon_init/s:\!::" utils/statd/statd.c
+	CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include"
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr  \
+		--sysconfdir=/etc      \
+            	--without-tcp-wrappers \
+            	--disable-nfsv4        \
+            	--disable-gss \
+		--sbindir=/sbin \
+		CC_FOR_BUILD=${CLFS_TARGET}-gcc
+
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

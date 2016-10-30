@@ -1,0 +1,25 @@
+# Description: GNU Wget is a free software package for retrieving files using HTTP, HTTPS and FTP, the most widely-used Internet protocols. It is a non-interactive commandline tool, so it may easily be called from scripts, cron jobs, terminals without X-Windows support, etc. 
+# URL: http://www.gnu.org/software/wget/
+# Maintainer: 
+
+
+NAME=bc
+VERSION=1.06.95
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://alpha.gnu.org/gnu/bc/bc-1.06.95.tar.bz2"
+PATCHES="bc-1.06.95-memory_leak-1.patch"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	process_patches
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_HOST}		\
+		--prefix=${TOOLCHAIN_DIR} --with-readline         
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

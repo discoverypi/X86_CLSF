@@ -1,0 +1,5 @@
+lrwxrwxrwx lib
+drwxr-xr-x lib64/
+drwxr-xr-x usr/
+drwxr-xr-x usr/sbin/
+-rwxr-xr-x usr/sbin/fbset

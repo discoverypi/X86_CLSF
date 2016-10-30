@@ -1,0 +1,27 @@
+# Description: framebuffer device maintenance program
+# URL: https://launchpad.net/ubuntu/+source/fbset
+# Maintainer: Debian QA Group
+
+
+NAME=fbset
+VERSION=2.1
+
+
+DEPENDS=""
+SOURCES="https://launchpad.net/ubuntu/+archive/primary/+files/fbset_2.1.orig.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+#mkdir ${PKG}/usr
+#mkdir ${PKG}/usr/lib64
+#ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	cp ../../../Makefile .
+
+
+	make 
+	make DESTDIR=${PKG} install
+
+}

@@ -1,0 +1,23 @@
+# Description: GNU Wget is a free software package for retrieving files using HTTP, HTTPS and FTP, the most widely-used Internet protocols. It is a non-interactive commandline tool, so it may easily be called from scripts, cron jobs, terminals without X-Windows support, etc. 
+# URL: http://www.gnu.org/software/wget/
+# Maintainer: 
+
+
+NAME=wget
+VERSION=1.16
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="ftp://ftp.gnu.org/gnu/${NAME}/${NAME}-${VERSION}.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_HOST}		\
+		--prefix=${TOOLCHAIN_DIR}
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

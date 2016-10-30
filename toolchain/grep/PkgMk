@@ -1,0 +1,21 @@
+# Description: The Grep package contains programs for searching through files. 
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/grep.html
+# Maintainer: 
+
+
+NAME=grep
+VERSION=2.21
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/grep/grep-2.21.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR} 
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

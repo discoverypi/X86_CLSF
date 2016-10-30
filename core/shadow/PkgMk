@@ -1,0 +1,44 @@
+# Description: Programs for handling passwords in a secure way
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter06/shadow.html
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=shadow
+VERSION=4.1.4.2
+
+
+DEPENDS=""
+SOURCES="http://pkg-shadow.alioth.debian.org/releases/${NAME}-${VERSION}.tar.bz2"
+PATCHES="shadow.patch"
+FILES="config.cache"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	patch_unknown_target config.sub
+	process_patches
+	copy_files
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--sysconfdir=/etc --without-libpam --without-audit	\
+		--without-selinux --without-nscd --cache-file=config.cache
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+	cp ${PKG}/etc/login.defs login.defs.orig
+	sed -e 's@#MD5_CRYPT_ENAB.no@MD5_CRYPT_ENAB yes@'		\
+		-e 's@/var/spool/mail@/var/mail@' login.defs.orig >	\
+		${PKG}/etc/login.defs
+
+    #Chande default group tu users(id=100)
+	cp ${PKG}/etc/default/useradd useradd
+	sed 's@GROUP=1000@GROUP=100@' useradd > ${PKG}/etc/default/useradd
+
+	mv -v ${PKG}/usr/bin/passwd ${PKG}/bin
+}

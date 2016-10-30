@@ -1,0 +1,22 @@
+# Description: The Coreutils package contains utilities for showing and setting the basic system characteristics.
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/coreutils.html
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=coreutils
+VERSION=8.23
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/coreutils/coreutils-8.23.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR} \
+		--enable-install-program=hostname
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

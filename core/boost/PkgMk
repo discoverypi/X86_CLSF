@@ -1,0 +1,30 @@
+# Description: Boost provides a set of free peer-reviewed portable C++ source libraries. It includes libraries for linear algebra, pseudorandom number generation, multithreading, image processing, regular expressions and unit testing. 
+# URL: http://downloads.sourceforge.net/boost/boost_1_59_0.tar.bz2
+# Maintainer:
+
+
+NAME=boost
+VERSION=1.59.0
+
+
+DEPENDS=""
+SOURCES="http://downloads.sourceforge.net/boost/boost_1_59_0.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd boost_1_59_0
+	sed -e '1 i#ifndef Q_MOC_RUN' \
+    	-e '$ a#endif'            \
+    	-i boost/type_traits/detail/has_binary_operator.hpp
+	
+	./bootstrap.sh --prefix=/Pi/clfs/usr 
+	cp ../../../project-config.jam .
+	PATH=$PATH ./bjam install toolset=gcc-x86 target-os=linux architecture=x86 -j6 -d2 --prefix=${PKG}/usr -o boost.log cxxflags="-I/Pi/core/icu/work/pkg/usr/include -I/Pi/core/zlib/work/pkg/usr/include -I/Pi/core/bzip2/work/pkg/usr/include -I${CLFS_DIR}/usr/include/python2.7" 
+
+
+}

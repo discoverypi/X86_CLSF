@@ -1,0 +1,10 @@
+drwxr-xr-x etc/
+-rw-r--r-- etc/ld.so.conf
+drwxr-xr-x etc/ld.so.conf.d/
+-rw-r--r-- etc/nscd.conf
+-rw-r--r-- etc/nsswitch.conf
+drwxr-xr-x lib/
+lrwxrwxrwx lib/ld-linux.so.3
+drwxr-xr-x var/
+drwxr-xr-x var/cache/
+drwxr-xr-x var/cache/nscd/

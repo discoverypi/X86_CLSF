@@ -1,0 +1,86 @@
+# Description: C library
+# URL: http://www.musl-libc.org/
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=glibc
+VERSION=2.13
+NO_DELETE=1
+
+
+DEPENDS=""
+SOURCES="https://ftp.gnu.org/gnu/${NAME}/${NAME}-${VERSION}.tar.xz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	wget -nc https://ftp.gnu.org/gnu/glibc/glibc-ports-2.13.tar.gz
+	tar xfk glibc-ports-2.13.tar.gz
+	cd ${NAME}-${VERSION}
+	
+	ln -s ../glibc-ports-2.13 ports
+	sed -i -e 's/static __m128i/inline &/' sysdeps/x86_64/multiarch/strstr.c
+
+
+	mkdir build
+	cd build
+	../configure --prefix=/usr				\
+		--build=${CLFS_BUILD}                                   \
+		--host=${CLFS_TARGET}                                 \
+		--target=${CLFS_TARGET}                                 \
+		--with-headers=${CLFS_DIR}/usr/include			\
+		--with-sysroot=${CLFS_DIR}				\
+		--with-build-sysroot=${CLFS_DIR}			\
+		--disable-multilib --disable-werror			\
+		--enable-kernel=2.6.32					\
+		--enable-obsolete-rpc					\
+
+	make -j${NR_JOBS} 
+	make  install_root=${PKG}/usr prefix="" install 
+	mkdir ${PKG}/etc
+	touch ${PKG}/etc/ld.so.conf
+	cp -v ../nscd/nscd.conf ${PKG}/etc/nscd.conf
+	mkdir -pv  ${PKG}/var/cache/nscd
+	
+	mkdir tmp
+	cat > tmp/nsswitch.conf << "EOF"
+# Begin /etc/nsswitch.conf
+
+passwd: files
+group: files
+shadow: files
+
+hosts: files dns
+networks: files
+
+protocols: files
+services: files
+ethers: files
+rpc: files
+
+# End /etc/nsswitch.conf
+EOF
+
+cat > tmp/ld.so.conf << "EOF"
+# Begin /etc/ld.so.conf
+/usr/lib
+/opt/lib
+
+EOF
+cp tmp/* ${PKG}/etc/.
+
+mkdir -pv ${PKG}/etc/ld.so.conf.d
+mkdir ${PKG}/lib
+cp ${PKG}/usr/lib/libc.so ${PKG}/lib/.
+cp ${PKG}/usr/lib/ld-2.13.so ${PKG}/lib/ld-linux-x86-64.so.2
+cp ${PKG}/usr/lib/libc.so.6 ${PKG}/lib/.
+cp ${PKG}/usr/lib/libc_nonshared.a ${PKG}/lib/.
+cp ${PKG}/usr/lib/libpthread.so.0 ${PKG}/lib/.
+cp ${PKG}/usr/lib/libpthread_nonshared.a ${PKG}/lib/.
+ln -sfv ld-linux-x86-64.so.2 ${PKG}/lib/ld-linux.so.2
+
+}

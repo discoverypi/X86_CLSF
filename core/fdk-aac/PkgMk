@@ -1,0 +1,28 @@
+# Description: fdk-aac package provides the Fraunhofer FDK AAC library, which is purported to be a high quality Advanced Audio Coding implementation.
+# URL: http://downloads.sourceforge.net/opencore-amr/fdk-aac-0.1.4.tar.gz
+# Maintainer:
+
+
+NAME=fdk-aac
+VERSION=0.1.4
+
+
+DEPENDS=""
+SOURCES="http://downloads.sourceforge.net/opencore-amr/fdk-aac-0.1.4.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr --disable-static
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

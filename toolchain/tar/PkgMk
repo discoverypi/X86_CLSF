@@ -1,0 +1,21 @@
+# Description: The Tar package contains an archiving program.
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/tar.html
+# Maintainer:
+
+
+NAME=tar
+VERSION=1.28
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/tar/tar-1.28.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	PKG_CONFIG= ./configure --prefix=${TOOLCHAIN_DIR}
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

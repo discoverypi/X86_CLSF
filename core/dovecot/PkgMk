@@ -1,0 +1,39 @@
+# Description: Dovecot is an Internet Message Access Protocol (IMAP) and Post Office Protocol (POP) server, written primarily with security in mind. Dovecot aims to be lightweight, fast and easy to set up as well as highly configurable and easily extensible with plugins. 
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/server/dovecot.html
+# Maintainer:
+
+
+NAME=dovecot
+VERSION=2.2.19
+
+
+DEPENDS=""
+SOURCES="http://www.dovecot.org/releases/2.2/dovecot-2.2.19.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	export CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include"
+	
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr \
+		--sysconfdir=/etc \
+            --localstatedir=/var \
+            --docdir=/usr/share/doc/dovecot-2.2.19 \
+            --disable-static \
+		i_cv_epoll_works=yes \
+i_cv_inotify_works=yes i_cv_posix_fallocate_works=yes \
+i_cv_signed_size_t=no i_cv_gmtime_max_time_t=32 i_cv_signed_time_t=yes \
+i_cv_mmap_plays_with_write=yes i_cv_fd_passing=yes \
+i_cv_c99_vsnprintf=yes lib_cv_va_copy=yes lib_cv___va_copy=yes \
+lib_cv_va_val_copy=yes  \
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

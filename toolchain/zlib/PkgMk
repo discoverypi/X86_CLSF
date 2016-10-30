@@ -1,0 +1,21 @@
+# Description: A Massively Spiffy Yet Delicately Unobtrusive Compression Library
+# URL: http://www.zlib.net/
+# Maintainer:  Jean-loup Gailly (compression) and Mark Adler (decompression). 
+
+
+NAME=zlib
+VERSION=1.2.8
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://www.zlib.net/zlib-1.2.8.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR}
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

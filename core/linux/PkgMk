@@ -1,0 +1,28 @@
+# Description: Linux kernel for Rpi
+# URL: https://kernel.org
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=linux
+VERSION=3.19
+NO_DELETE=1
+
+
+DEPENDS=""
+SOURCES="https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.19.tar.xz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd linux-3.19
+	cp /Pi/core/linux/config .config
+	make -j${NR_JOBS} CROSS_COMPILE=${CLFS_TARGET}-
+
+	make CROSS_COMPILE=${CLFS_TARGET}- INSTALL_MOD_PATH=${PKG} \
+		DEPMOD=${TOOLCHAIN_DIR}/sbin/depmod modules_install
+
+}

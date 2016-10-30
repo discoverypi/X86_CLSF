@@ -1,0 +1,28 @@
+# Description: The libcdio is a library for CD-ROM and CD image access. The assiciated libcido-cdparanoia library reads audio from the CD-ROM directly as data, with no analog step between, and writes the data to a file or pipe as .wav, .aifc or as raw 16 bit linear PCM. 
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/multimedia/libcdio.html
+# Maintainer:
+
+
+NAME=libcdio
+VERSION=0.93
+
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/libcdio/libcdio-0.93.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr --disable-static
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

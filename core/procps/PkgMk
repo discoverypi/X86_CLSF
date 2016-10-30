@@ -1,0 +1,27 @@
+# Description: /proc file system utilities
+# URL: http://procps.sourceforge.net/
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=procps
+VERSION=3.2.8
+
+
+DEPENDS=""
+SOURCES="http://procps.sourceforge.net/${NAME}-${VERSION}.tar.gz"
+PATCHES="procps.patch"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	cp ../../../Makefile .
+	process_patches
+
+	make CPPFLAGS="-I${CLFS_DIR}/usr/include" lib64=lib m64= ldl=proc/libproc-3.2.8.so
+	make DESTDIR=${PKG} lib64=lib m64= ldconfig= install="install -D" install
+}

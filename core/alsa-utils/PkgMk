@@ -1,0 +1,32 @@
+# Description: The ALSA Utilities package contains various utilities which are useful for controlling your sound card.  
+# URL: http://alsa.cybermirror.org/utils/alsa-utils-1.0.29.tar.bz2
+# Maintainer: 
+
+
+NAME=alsa-utils
+VERSION=1.0.29
+
+
+DEPENDS="alsa-lib"
+SOURCES="http://alsa.cybermirror.org/utils/alsa-utils-1.0.29.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-$VERSION
+	export CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include"
+
+	./configure --prefix=/usr --build=${CLFS_HOST}			\
+		--host=${CLFS_TARGET} \
+		--disable-alsaconf \
+		--disable-xmlto 
+		#--with-pythonlibs="-L${CLFS_DIR}/usr/lib" \
+		#--with-pythonincludes="-I${CLFS_DIR}/usr/include/python2.7"  					
+
+	make -j${NR_JOBS} 
+	make DESTDIR=${PKG} install
+}

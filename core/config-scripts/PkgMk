@@ -1,0 +1,29 @@
+# Description: Set of important file that may need user modifications
+# URL:
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=config-scripts
+VERSION=0.1
+
+
+DEPENDS=""
+SOURCES=""
+FILES="fstab shells hosts"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	mkdir ${NAME}-${VERSION}
+	cd ${NAME}-${VERSION}
+	copy_files
+
+	mkdir ${PKG}/etc
+	install -v -m744 shells ${PKG}/etc/shells
+	install -v -m744 fstab ${PKG}/etc/fstab
+	install -v -m744 hosts ${PKG}/etc/hosts
+}

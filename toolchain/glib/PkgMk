@@ -1,0 +1,35 @@
+# Description: software utility library from GTK+'s project
+# URL: https://developer.gnome.org/glib/
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=glib
+VERSION=2.44.1
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="http://ftp.gnome.org/pub/gnome/sources/${NAME}/2.44/${NAME}-${VERSION}.tar.xz"
+PATCHES="glib-missing-include-dirs.patch"
+FILES="config.cache"
+
+
+pkgmain() {
+	cd ${NAME}-$VERSION
+
+	#process_patches
+	#copy_files
+	PATH=/toolsx/bin:$PATH
+	
+
+	#disable man pages as it needs xsltproc to build
+	PKG_CONFIG_PATH="${TOOLCHAIN_DIR}/lib/pkgconfig" \
+	CFLAGS="$CFLAGS -D_GNU_SOURCE -D_BSD_SOURCE -I${TOOLCHAIN_DIR}/lib/libffi-3.0.13/include "			\
+	./configure --prefix=${TOOLCHAIN_DIR} --build=${CLFS_HOST}		\
+		--host=${CLFS_HOST} --enable-man=no --disable-systemtap		\
+		--cache-file=config.cache
+
+	make -j${NR_JOBS}
+	fix_temporary_libtool_files
+	make DESTDIR=${PKG} install
+}

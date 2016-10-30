@@ -1,0 +1,28 @@
+# Description: SQLite: An Embeddable SQL Database Engine
+# URL: http://www.paldo.org/index-section-packages-page-main-releaseid-11831.html
+# Maintainer:
+
+
+NAME=sqlite-autoconf
+VERSION=3.8.11.1
+
+
+DEPENDS=""
+SOURCES="http://www.paldo.org/paldo/sources/sqlite3/sqlite-autoconf-3.8.11.1.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd sqlite-autoconf-3081101
+	CFLAGS="$CFLAGS -DYYSTACKDEPTH=500 -DSQLITE_DISABLE_DIRSYNC=1 -DSQLITE_SECURE_DELETE=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1 -DUSE_PREAD64=1 -I${CLFS_DIR}/usr/include"  \
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr --disable-static
+
+	make 
+	make DESTDIR=${PKG} install
+
+}

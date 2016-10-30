@@ -1,0 +1,33 @@
+# Description: irc fast light and extensible client
+# URL: http://weechat.org/
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=weechat
+VERSION=1.0
+
+
+DEPENDS="gettext curses libgcrypt gnutls curl"
+SOURCES="http://${NAME}.org/files/src/${NAME}-${VERSION}.tar.gz"
+PATCHES="weechat-libcurl-conf.patch"
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-$VERSION
+
+	process_patches
+	export CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include"
+	./autogen.sh
+	./configure --prefix=/usr --build=${CLFS_HOST}		\
+		--host=${CLFS_TARGET} --prefix=/usr		\
+		--disable-aspell --disable-perl --disable-ruby	\
+		--disable-lua --disable-python --disable-tcl	\
+		--disable-guile
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

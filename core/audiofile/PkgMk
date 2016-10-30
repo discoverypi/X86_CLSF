@@ -1,0 +1,28 @@
+# Description: The AudioFile package contains the audio file libraries and two sound file support programs useful to support basic sound file formats.
+# URL: http://ftp.gnome.org/pub/gnome/sources/audiofile/0.3/audiofile-0.3.6.tar.xz
+# Maintainer:
+
+
+NAME=audiofile
+VERSION=0.3.6
+
+
+DEPENDS=""
+SOURCES="http://ftp.gnome.org/pub/gnome/sources/audiofile/0.3/audiofile-0.3.6.tar.xz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	export CPPFLAGS="$CPPFLAGS -I/${CLFS_DIR}/usr/include"
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

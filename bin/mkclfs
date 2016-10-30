@@ -1,0 +1,8 @@
+TOOLS_BASEDIR=$(dirname $(readlink -e $0))
+PKGMK_BASEDIR=$(dirname ${TOOLS_BASEDIR})
+. $PKGMK_BASEDIR/config/common.conf
+read -p " This will delete all the data in clfs directory!!! Press [Enter] key to continue..."
+rm -rf ${CLFS_DIR}
+mkdir ${CLFS_DIR}
+mkdir ${CLFS_DIR}/tools
+mkdir ${CLFS_DIR}/toolsx

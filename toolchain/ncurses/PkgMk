@@ -1,0 +1,25 @@
+# Description: The Ncurses package contains libraries for terminal-independent handling of character screens.
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/ncurses.html
+# Maintainer: 
+
+
+NAME=ncurses
+VERSION=5.9
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu//ncurses/ncurses-5.9.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR}  \
+		--with-shared   \
+            	--without-debug \
+            	--without-ada   \
+		--enable-overwrite
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

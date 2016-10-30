@@ -1,0 +1,31 @@
+# Description: The Simple DirectMedia Layer (SDL for short) is a cross-platform library designed to make it easy to write multimedia software, such as games and emulators.
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/multimedia/sdl.html
+# Maintainer:
+
+
+NAME=SDL
+VERSION=1.2.15
+
+
+DEPENDS=""
+SOURCES="http://www.libsdl.org/release/SDL-1.2.15.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	sed -e '/_XData32/s:register long:register _Xconst long:' \
+    -i src/video/x11/SDL_x11sym.h &&
+	CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include" \
+	LDFLAGS="$LDFLAGS -L${CLFS_DIR}/usr/lib" \
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr --disable-static
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

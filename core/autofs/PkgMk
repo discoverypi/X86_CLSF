@@ -1,0 +1,36 @@
+# Description: Autofs controls the operation of the automount daemons. The automount daemons automatically mount filesystems when they are accessed and unmount them after a period of inactivity. This is done based on a set of pre-configured maps. 
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/general/autofs.html
+# Maintainer:
+
+
+NAME=autofs
+VERSION=5.1.1
+
+
+DEPENDS=""
+SOURCES="http://www.kernel.org/pub/linux/daemons/autofs/v5/autofs-5.1.1.tar.xz"
+FILES="rc-autofs"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	copy_files
+	export CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include/tirpc -I${CLFS_DIR}/usr/include" 
+	export LDFLAGS="$LDFLAGS -ltirpc"
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr  \
+		--without-openldap --with-libtirpc \
+            --mandir=/usr/share/man
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+	mkdir ${PKG}/etc
+	mkdir ${PKG}/etc/rc.d
+	cp rc-autofs ${PKG}/etc/rc.d/autofs
+
+
+}

@@ -1,0 +1,21 @@
+# Description: Check is a unit testing framework for C. 
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/check.html
+# Maintainer: 
+
+
+NAME=check
+VERSION=0.9.14
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://sourceforge.net/projects/check/files/check/0.9.14/check-0.9.14.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	PKG_CONFIG= ./configure --prefix=${TOOLCHAIN_DIR}
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

@@ -1,0 +1,26 @@
+# Description: Support for a variety of archive and compression formats
+# URL: http://www.libarchive.org
+# Maintainer: 
+
+
+NAME=libarchive
+VERSION=3.1.2
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="http://www.libarchive.org/downloads/libarchive-3.1.2.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	LDFLAGS="-Wl,-rpath-link,${TOOLCHAIN_DIR}/lib"          \
+	LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${TOOLCHAIN_DIR}/lib" \
+	CPPFLAGS="$CPPFLAGS -I${TOOLCHAIN_DIR}/include/libxml2 -I/tools/include -L${TOOLCHAIN_DIR}/lib" \
+	./configure --prefix=${TOOLCHAIN_DIR} \
+		    --disable-static  \
+			LIBS="-L/toolsx/lib"		    
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

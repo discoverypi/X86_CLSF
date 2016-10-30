@@ -1,0 +1,28 @@
+# Description: The libogg package contains the Ogg file structure. This is useful for creating (encoding) or playing (decoding) a single physical bit stream.
+# URL: http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz
+# Maintainer:
+
+
+NAME=libogg
+VERSION=1.3.2
+
+
+DEPENDS=""
+SOURCES="http://downloads.xiph.org/releases/ogg/libogg-1.3.2.tar.xz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr --disable-static 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

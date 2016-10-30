@@ -1,0 +1,27 @@
+# Description: TinyXML is a simple, small, C++ XML parser that can be easily integrating into other programs.
+# URL: http://www.grinninglizard.com/tinyxml/
+# Maintainer:
+
+
+NAME=tinyxml
+VERSION=2_6_2
+HOST_PKG=1
+PATCHES="tinyxml_2_6_2-shared_lib.patch"
+
+
+DEPENDS=""
+SOURCES="http://sourceforge.net/projects/tinyxml/files/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz"
+
+
+pkgmain() {
+	cd tinyxml
+	process_patches
+	cp ../../../Makefile .
+
+	make -j${NR_JOBS}
+	mkdir ${PKG}/toolsx
+	mkdir ${PKG}/toolsx/lib
+	mkdir ${PKG}/toolsx/include
+	make DESTDIR=${PKG} install
+
+}

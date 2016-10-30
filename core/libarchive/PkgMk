@@ -1,0 +1,30 @@
+# Description: File type guesser
+# URL: http://www.darwinsys.com/file/
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=libarchive
+VERSION=3.1.2
+
+
+DEPENDS=""
+SOURCES="http://www.libarchive.org/downloads/libarchive-3.1.2.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	LDFLAGS="-Wl,-rpath-link,${TOOLCHAIN_DIR}/lib"          \
+	LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${TOOLCHAIN_DIR}/lib" \
+	CPPFLAGS="$CPPFLAGS -I$${CLFS_DIR}/usr/include/libxml2 -I/${TOOLCHAIN_DIR}/include -L${TOOLCHAIN_DIR}/lib" \
+	./configure --host=${CLFS_TARGET} --prefix=/usr \
+		    --disable-static  \
+			LIBS="-L${CLFS_DIR}/usr/lib"		    
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

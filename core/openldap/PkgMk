@@ -1,0 +1,39 @@
+# Description:  The OpenLDAP package provides an open source implementation of the Lightweight Directory Access Protocol.
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/server/openldap.html
+# Maintainer:
+
+
+NAME=openldap
+VERSION=2.4.42
+
+
+DEPENDS=""
+SOURCES="ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.42.tgz"
+PATCHES="openldap-2.4.42-consolidated-1.patch"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	tar -zxf openldap-2.4.42.tgz
+	cd ${NAME}-${VERSION}
+	#process_patches
+	export CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include"
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr \
+		--sysconfdir=/etc \
+            	--disable-static  \
+            	--enable-dynamic  \
+            	--disable-debug   \
+		--with-yielding_select=yes \
+            	--disable-slapd
+	cp ../../../portable.h include/.
+	cp ../../../shtool build/.
+	make depend 
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG}  install
+
+}

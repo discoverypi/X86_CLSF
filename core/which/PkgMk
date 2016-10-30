@@ -1,0 +1,28 @@
+# Description: The presence or absence of the which program in the main LFS book is probably one of the most contentious issues on the mailing lists. It has resulted in at least one flame war in the past. To hopefully put an end to this once and for all, presented here are two options for equipping your system with which. The question of which “which” is for you to decide. 
+# URL: http://ftp.gnu.org/gnu/which/which-2.21.tar.gz
+# Maintainer:
+
+
+NAME=which
+VERSION=2.21
+
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/which/which-2.21.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

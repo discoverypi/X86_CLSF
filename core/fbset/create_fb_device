@@ -1,0 +1,10 @@
+CLFS_DIR=/Pi/clfs
+        if [ ! -c ${CLFS_DIR}/dev/fb0 ]; then mknod ${CLFS_DIR}/dev/fb0 c 29 0; fi
+        if [ ! -c ${CLFS_DIR}/dev/fb1 ]; then mknod ${CLFS_DIR}/dev/fb1 c 29 32; fi
+        if [ ! -c ${CLFS_DIR}/dev/fb2 ]; then mknod ${CLFS_DIR}/dev/fb2 c 29 64; fi
+        if [ ! -c ${CLFS_DIR}/dev/fb3 ]; then mknod ${CLFS_DIR}/dev/fb3 c 29 96; fi
+        if [ ! -c ${CLFS_DIR}/dev/fb4 ]; then mknod ${CLFS_DIR}/dev/fb4 c 29 128; fi
+        if [ ! -c ${CLFS_DIR}/dev/fb5 ]; then mknod ${CLFS_DIR}/dev/fb5 c 29 160; fi
+        if [ ! -c ${CLFS_DIR}/dev/fb6 ]; then mknod ${CLFS_DIR}/dev/fb6 c 29 192; fi
+        if [ ! -c ${CLFS_DIR}/dev/fb7 ]; then mknod ${CLFS_DIR}/dev/fb7 c 29 224; fi
+

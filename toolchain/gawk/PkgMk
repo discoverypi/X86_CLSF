@@ -1,0 +1,21 @@
+# Description: The Gawk package contains programs for manipulating text files. 
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/gawk.html
+# Maintainer: 
+
+
+NAME=gawk
+VERSION=4.1.1
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/gawk/gawk-4.1.1.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	./configure --prefix=${TOOLCHAIN_DIR} 
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

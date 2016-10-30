@@ -1,0 +1,11 @@
+lrwxrwxrwx lib
+drwxr-xr-x lib64/
+drwxr-xr-x usr/
+drwxr-xr-x usr/include/
+-rw-r--r-- usr/include/tinystr.h
+-rw-r--r-- usr/include/tinyxml.h
+lrwxrwxrwx usr/lib
+drwxr-xr-x usr/lib64/
+lrwxrwxrwx usr/lib64/libtinyxml.so
+lrwxrwxrwx usr/lib64/libtinyxml.so.0
+-rwxr-xr-x usr/lib64/libtinyxml.so.2.6.2

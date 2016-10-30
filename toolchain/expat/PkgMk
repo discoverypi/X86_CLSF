@@ -1,0 +1,21 @@
+# Description: xpat is an XML parser library written in C. It is a stream-oriented parser in which an application registers handlers for things the parser might find in the XML document (like start tags). 
+# URL: http://expat.sourceforge.net/
+# Maintainer: 
+
+
+NAME=expat
+VERSION=2.1.0
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://downloads.sourceforge.net/expat/expat-2.1.0.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+
+	PKG_CONFIG= ./configure --prefix=${TOOLCHAIN_DIR} --disable-static
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

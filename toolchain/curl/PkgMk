@@ -1,0 +1,26 @@
+# Description:  libcurl is a free and easy-to-use client-side URL transfer library, supporting DICT, FILE, FTP, FTPS, Gopher, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, Telnet and TFTP. libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP form based upload, proxies, cookies, user+password authentication (Basic, Digest, NTLM, Negotiate, Kerberos), file transfer resume, http proxy tunneling and more!
+#
+# libcurl is highly portable, it builds and works identically on numerous platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HPUX, IRIX, AIX, Tru64, Linux, UnixWare, HURD, Windows, Amiga, OS/2, BeOs, Mac OS X, Ultrix, QNX, OpenVMS, RISC OS, Novell NetWare, DOS and more... 
+# URL: http://curl.haxx.se/libcurl/
+# Maintainer: 
+
+
+NAME=curl
+VERSION=7.35.0
+HOST_PKG=1
+
+
+DEPENDS="openssl"
+SOURCES="http://curl.haxx.se/download/${NAME}-${VERSION}.tar.gz"
+
+
+pkgmain() {
+	cd ${NAME}-$VERSION
+	export LD_LIBRARY_PATH="/tools/x86_64-cross-linux-gnu/lib64:/toolsx/lib"
+	
+	./configure --prefix=${TOOLCHAIN_DIR} --build=${CLFS_HOST}			\
+		--host=${CLFS_HOST}					\
+
+	make -j${NR_JOBS}
+	make  DESTDIR=${PKG} install
+}

@@ -1,0 +1,58 @@
+# Description: C compiler
+# URL: http://gcc.gnu.org/
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=gcc
+VERSION=4.9.2
+
+
+DEPENDS="mpfr gmp mpc ppl cloog-ppl"
+SOURCES="https://ftp.gnu.org/gnu/gcc/gcc-4.9.2/gcc-4.9.2.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	sed -i 's/^T_CFLAGS =$/& -fomit-frame-pointer/' gcc/Makefile.in
+
+	cp libiberty/Makefile.in{,.orig}
+	sed 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in.orig > \
+		libiberty/Makefile.in
+
+	#Fix the gcc fix include shit
+	sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
+
+	mkdir build
+	cd build
+	export LDFLAGS="-Wl,-rpath-link,${TOOLCHAIN_DIR}/${CLFS_TARGET}/lib -L${CLFS_DIR}/usr/lib"
+	MAKEINFO=missing						\
+	../configure --prefix=/usr --libexecdir=/usr/lib		\
+		--build=${CLFS_HOST} --host=${CLFS_TARGET}	\
+		--target=${CLFS_TARGET}	--enable-shared			\
+		--enable-threads=posix --enable-c99 --enable-long-long	\
+		--enable-clocale=gnu --enable-languages=c,c++		\
+		--disable-libstdcxx-pch					\
+		--disable-libsanitizer					\
+		--disable-libmudflap --disable-nls			\
+		--with-mpfr=${CLFS_DIR}/usr				\
+		--with-gmp=${CLFS_DIR}/usr				\
+		--with-mpc=${CLFS_DIR}/usr				\
+		--with-ppl=${CLFS_DIR}/usr				\
+		--with-build-sysroot=${CLFS_DIR}			\
+
+	make -j${NR_JOBS}
+	fix_temporary_libtool_files
+	make DESTDIR=${PKG} install
+
+	mkdir ${PKG}/lib
+	ln -sfv ../usr/bin/cpp ${PKG}/lib/cpp
+	ln -sfv gcc ${PKG}/usr/bin/cc
+	mv ${PKG}/usr/lib/libgcc_s.so.1 ${PKG}/lib/
+	ln -sfv /lib/libgcc_s.so.1 ${PKG}/usr/lib/libgcc_s.so.1
+}

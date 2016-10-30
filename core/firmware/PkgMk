@@ -1,0 +1,32 @@
+# Description: Now that Broadcom has open sourced the ARM userland libraries, we can replace the contents of /opt/vc from the firmware repo with our own build.
+# URL: https://github.com/raspberrypi/userland/archive/master.tar.gz -O userland.tar.gz
+# Maintainer:
+
+
+NAME=firmware
+VERSION=master
+
+
+DEPENDS=""
+SOURCES="https://github.com/raspberrypi/userland/archive/master.tar.gz "
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	mv ../../master master.tar.gz
+	tar -zxf master.tar.gz
+	cd userland-master
+	mkdir build
+	cp ../../../CMakeLists.gencmd host_applications/linux/apps/gencmd/CMakeLists.txt
+	cp ../../../CMakeLists.mmal interface/mmal/CMakeLists.txt
+	cp ../../../CMakeLists.vmcs interface/vmcs_host/CMakeLists.txt
+	cd build
+	cmake -DCMAKE_BUILD_TYPE=Release ..
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

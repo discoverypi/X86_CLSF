@@ -1,0 +1,164 @@
+# Description: C compiler
+# URL: http://gcc.gnu.org/
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=gccx
+VERSION=4.9.2
+HOST_PKG=1
+
+SOURCES="https://ftp.gnu.org/gnu/gcc/gcc-4.9.2/gcc-4.9.2.tar.gz"
+
+pkgmain() {
+	export PATH=${PKG}/bin:${PATH}
+	BINUTILS_VERSION=binutils-2.22
+        LINUX_VERSION=linux-3.19
+        GLIBC_VERSION=glibc-2.13
+        MPFR_VERSION=mpfr-3.1.2
+        GMP_VERSION=gmp-6.0.0a
+        MPC_VERSION=mpc-1.0.2
+        ISL_VERSION=isl-0.12.2
+        CLOOG_VERSION=cloog-0.18.1
+	GCC_VERSION=gcc-4.9.2
+
+	cd ..
+	rm -rf pkg
+	ln -s /toolsx pkg
+	cd src
+
+	cd $GCC_VERSION
+        cd ..
+	if [ -d /Pi/hostsrc ]; then
+		cp /Pi/hostsrc/$BINUTILS_VERSION.tar.gz .
+                cp /Pi/hostsrc/linux-3.19.tar.xz .
+                cp /Pi/hostsrc/$GLIBC_VERSION.tar.xz .
+                cp /Pi/hostsrc/$MPFR_VERSION.tar.xz .
+                cp /Pi/hostsrc/$GMP_VERSION.tar.xz .
+                cp /Pi/hostsrc/$MPC_VERSION.tar.gz .
+                cp /Pi/hostsrc/$ISL_VERSION.tar.bz2 .
+                cp /Pi/hostsrc/$CLOOG_VERSION.tar.gz .
+                cp /Pi/hostsrc/glibc-ports-2.13.tar.gz .
+        else
+		wget -nc http://ftp.gnu.org/gnu/binutils/$BINUTILS_VERSION.tar.gz
+		wget -nc https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.19.tar.xz
+        	wget -nc https://ftp.gnu.org/gnu/glibc/$GLIBC_VERSION.tar.xz
+        	wget -nc https://ftp.gnu.org/gnu/mpfr/$MPFR_VERSION.tar.xz
+		wget -nc https://ftp.gnu.org/gnu/gmp/$GMP_VERSION.tar.xz
+		wget -nc https://ftp.gnu.org/gnu/mpc/$MPC_VERSION.tar.gz
+		wget -nc ftp://gcc.gnu.org/pub/gcc/infrastructure/$ISL_VERSION.tar.bz2
+		wget -nc ftp://gcc.gnu.org/pub/gcc/infrastructure/$CLOOG_VERSION.tar.gz
+		wget -nc https://ftp.gnu.org/gnu/glibc/glibc-ports-2.13.tar.gz
+	fi
+	#cp ../../*.tar.* .
+	#rm gcc-4.9.2-host-pkg.tar.bz2
+	#rm gcc-4.9.2.tar.gz
+
+	# Extract everything
+	for f in *.tar*; do tar xfk $f; done
+        
+        # Make symbolic links
+        cd $GCC_VERSION
+        ln -sf `ls -1d ../mpfr-*/` mpfr
+	ln -sf `ls -1d ../gmp-*/` gmp
+	ln -sf `ls -1d ../mpc-*/` mpc
+	ln -sf `ls -1d ../isl-*/` isl
+	ln -sf `ls -1d ../cloog-*/` cloog
+	
+	sed -i '/k prot/agcc_cv_libc_provides_ssp=yes' gcc/configure
+
+        cd ..
+        cd $GLIBC_VERSION
+        ln -s ../glibc-ports-2.13 ports
+	sed -i -e 's/static __m128i/inline &/' sysdeps/x86_64/multiarch/strstr.c
+        cd ..
+
+read -p "Press [Enter] key to start Install Cross Binutils..."
+	# Install Binutils
+	cd $BINUTILS_VERSION
+	AR=ar AS=as ./configure --prefix=${TOOLCHAIN_DIR}   \
+		--host=${CLFS_HOST}     	\
+                --target=${CLFS_TARGET}         \
+		--with-sysroot=${CLFS_DIR}      \
+                --disable-multilib              \
+		--disable-werror 		\
+		--disable-nls --disable-shared  \
+		--enable-interwork --enable-plugins
+        make -j${NR_JOBS}
+        make install
+echo ${PKG}
+
+read -p "Press [Enter] key to RPi Linux Header..."
+	# Install Linux Header
+	cd ..
+	cd $LINUX_VERSION
+	make mrproper
+	make CROSS_COMPILE=${CLFS_TARGET}- headers_check
+	make CROSS_COMPILE=${CLFS_TARGET}- 			\
+		INSTALL_HDR_PATH=${TOOLCHAIN_DIR}/${CLFS_TARGET} headers_install
+
+read -p "Press [Enter] key to start Install Cross GCC"
+	cd ..
+	mkdir build_gcc
+	cd build_gcc
+	../$GCC_VERSION/configure --prefix=${TOOLCHAIN_DIR}       	\
+		--build=${CLFS_HOST}					\
+		--host=${CLFS_HOST}					\
+		--target=${CLFS_TARGET}                 		\
+		--with-local-prefix=${TOOLCHAIN_DIR}			\
+		--with-native-system-header-dir=${TOOLCHAIN_DIR}/${CLFS_TARGET}/include \
+		--disable-multilib 					\
+                --disable-werror 					\
+		--enable-languages=c,c++ 				\
+
+	make -j${NR_JOBS} all-gcc
+	make install-gcc
+	cd ..
+
+read -p "Press [Enter] key to start Install Cross GLIBC HEADER..."
+	# Standard C Library Headers and Startup Files
+	echo "##### Install GLIBC Header #########"
+	mkdir build_glibc
+	cd build_glibc
+	../$GLIBC_VERSION/configure --prefix=${TOOLCHAIN_DIR}/${CLFS_TARGET} \
+                --build=${CLFS_HOST} 					\
+                --host=${CLFS_TARGET}					\
+                --target=${CLFS_TARGET}                                 \
+                --with-headers=${TOOLCHAIN_DIR}/${CLFS_TARGET}/include	\
+		--enable-add-ons=nptl,ports				\
+                --disable-multilib --disable-werror                     \
+                libc_cv_forced_unwind=yes libc_cv_c_cleanup=yes 
+
+	make install-bootstrap-headers=yes install-headers
+	make -j${NR_JOBS} csu/subdir_lib
+
+	#mkdir ${TOOLCHAIN_DIR}/${CLFS_TARGET}/lib64
+	ln -s lib ${TOOLCHAIN_DIR}/${CLFS_TARGET}/lib64
+	install csu/crt1.o csu/crti.o csu/crtn.o ${TOOLCHAIN_DIR}/${CLFS_TARGET}/lib64
+	${TOOLCHAIN_DIR}/bin/${CLFS_TARGET}-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o ${TOOLCHAIN_DIR}/${CLFS_TARGET}/lib64/libc.so
+	touch ${TOOLCHAIN_DIR}/${CLFS_TARGET}/include/gnu/stubs.h
+
+read -p "Press [Enter] key to start Install Cross libgcc..."
+	# Compiler Support Library
+	echo "##### Install libgcc #########"
+	cd ../build_gcc
+	make -j${NR_JOBS} all-target-libgcc
+	make install-target-libgcc
+
+read -p "Press [Enter] key to start Install Cross GLIBC..."
+
+	# Standard C Library & the rest of Glibc
+	echo  "##### Install GLIBC #########"
+	cd ../build_glibc
+	make -j${NR_JOBS}
+	make install
+
+read -p "Press [Enter] key to start Install C++ Library & the rest of GCC..."
+
+	# Step 7. Standard C++ Library & the rest of GCC
+	echo "##### Install GCC #########"
+	cd ../build_gcc
+	cd build
+	make -j${NR_JOBS} all
+	make install
+        
+}

@@ -1,0 +1,25 @@
+# Description: Python is a programming language that lets you work quickly and integrate systems more effectively.
+# URL: https://www.python.org/
+# Maintainer:
+
+
+NAME=Python
+VERSION=2.7.2
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="https://www.python.org/ftp/python/2.7.2/Python-2.7.2.tar.xz"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+
+	./configure --prefix=${TOOLCHAIN_DIR}
+
+
+	make -j${NR_JOBS} python Parser/pgen
+	make DESTDIR=${PKG} install
+	cp Parser/pgen ${PKG}/toolsx/bin/.
+
+}

@@ -1,0 +1,17 @@
+lrwxrwxrwx lib
+drwxr-xr-x lib64/
+drwxr-xr-x usr/
+drwxr-xr-x usr/bin/
+-rwxr-xr-x usr/bin/zip
+-rwxr-xr-x usr/bin/zipcloak
+-rwxr-xr-x usr/bin/zipnote
+-rwxr-xr-x usr/bin/zipsplit
+lrwxrwxrwx usr/lib
+drwxr-xr-x usr/lib64/
+drwxr-xr-x usr/share/
+drwxr-xr-x usr/share/man/
+drwxr-xr-x usr/share/man/man1/
+-rw-r--r-- usr/share/man/man1/zip.1
+-rw-r--r-- usr/share/man/man1/zipcloak.1
+-rw-r--r-- usr/share/man/man1/zipnote.1
+-rw-r--r-- usr/share/man/man1/zipsplit.1

@@ -1,0 +1,36 @@
+# Description: Collection of utilities for controlling TCP / IP networking and
+#		traffic control
+# URL: http://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2
+# Maintainer: Remi Pommarel, repk at triplefau dot lt
+
+
+NAME=iproute2
+VERSION=4.1.1
+
+
+DEPENDS="iptables"
+SOURCES="https://www.kernel.org/pub/linux/utils/net/${NAME}/${NAME}-${VERSION}.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	sed -i '/^TARGETS/s@arpd@@g' misc/Makefile
+	sed -i /ARPD/d Makefile
+	sed -i 's/arpd.8//' man/man8/Makefile
+	export CFLAGS="$CFLAGS -I${CLFS_DIR}/usr/include"
+
+
+	make -j${NR_JOBS}  DESTDIR=${PKG}  CC="${CC}"	\
+		DOCDIR=/usr/share/doc/iproute2				\
+		MANDIR=/usr/share/man 			\
+		IPT_LIB_DIR=${CLFS_DIR}/usr/include
+
+	LDFLAGS="$LDFLAGS"  LD_LIBRARY_PATH="$LD_LIBRARY_PATH" make DESTDIR=${PKG} CC="${CC}"	\
+		DOCDIR=/usr/share/doc/iproute2 MANDIR=/usr/share/man	\
+		IPT_LIB_DIR=${CLFS_DIR}/usr/include install
+}

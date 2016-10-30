@@ -1,0 +1,72 @@
+# Description:
+# URL:
+# Maintainer:
+
+
+NAME=sendmail
+VERSION=8.15.2
+
+
+DEPENDS=""
+SOURCES="ftp://ftp.sendmail.org/pub/sendmail/sendmail.8.15.2.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	chmod -v 1777 ${PKG}/var/mail
+	install -v -m700 -d ${PKG}/var/spool/mqueue
+	cat >> devtools/Site/site.config.m4 << "EOF"
+APPENDDEF(`confENVDEF',`-DSTARTTLS -DSASL -DLDAPMAP')
+APPENDDEF(`confLIBS', ` -L/Pi/clfs/usr/lib -lssl -lcrypto -lsasl2 -lldap -llber -ldb')
+APPENDDEF(`confINCDIRS', `-I/Pi/clfs/usr/include/sasl -I/Pi/clfs/usr/include')
+EOF
+	cat >> devtools/Site/site.config.m4 << "EOF"
+define(`confMANGRP',`root')
+define(`confMANOWN',`root')
+define(`confSBINGRP',`root')
+define(`confUBINGRP',`root')
+define(`confUBINOWN',`root')
+define(`confCC',`arm-unknown-linux-gnueabi-gcc  -march=armv6j -mtune=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard -Wno-error')
+define(`confCCLINK',`arm-unknown-linux-gnueabi-gcc')
+define(`confLIBDIR',`/Pi/clfs/usr/lib/')
+define(`confNROFF',`cat')
+define(`confMANDOC',`')
+EOF
+	sed -i 's|/usr/man/man|/usr/share/man/man|' \
+    devtools/OS/Linux 
+	install -v -d -m755 ${PKG}/usr/bin
+	install -v -d -m755 ${PKG}/usr/sbin
+	install -v -d -m755 ${PKG}/usr/share/man/man1
+	install -v -d -m755 ${PKG}/usr/share/man/man5
+	install -v -d -m755 ${PKG}/usr/share/man/man8
+	install -v -d -m755 ${PKG}/etc/mail
+
+	cd sendmail
+	sh Build DESTDIR=${PKG}
+	sh Build DESTDIR=${PKG} install-sendmail
+	cd ../cf/cf
+	cp generic-linux.mc sendmail.mc
+	sh Build DESTDIR=${PKG} sendmail.cf
+
+install -v -d -m755 ${PKG}/etc/mail
+sh Build DESTDIR=${PKG} install-cf
+cd ../../
+sh Build DESTDIR=${PKG} install
+install -v -m644 cf/cf/{submit,sendmail}.mc ${PKG}/etc/mail
+cp -v -R cf/* ${PKG}/etc/mail
+install -v -m755 -d ${PKG}/usr/share/doc/sendmail-8.15.2/{cf,sendmail}
+install -v -m644 CACerts FAQ KNOWNBUGS LICENSE PGPKEYS README RELEASE_NOTES \
+        ${PKG}/usr/share/doc/sendmail-8.15.2
+install -v -m644 sendmail/{README,SECURITY,TRACEFLAGS,TUNING} \
+        ${PKG}/usr/share/doc/sendmail-8.15.2/sendmail
+install -v -m644 cf/README ${PKG}/usr/share/doc/sendmail-8.15.2/cf
+
+
+}
+

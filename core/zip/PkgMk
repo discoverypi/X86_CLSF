@@ -1,0 +1,27 @@
+# Description: The Zip package contains Zip utilities. These are useful for compressing files into ZIP archives.
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/general/zip.html
+# Maintainer:
+
+
+NAME=zip
+VERSION=3.0
+
+
+DEPENDS=""
+SOURCES="http://downloads.sourceforge.net/infozip/zip30.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd zip30
+	cp ../../../Makefile unix/.
+
+	make -f unix/Makefile generic_gcc
+	make prefix=/${PKG}/usr -f unix/Makefile install
+
+
+}

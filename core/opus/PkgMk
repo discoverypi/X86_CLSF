@@ -1,0 +1,28 @@
+# Description: Opus is a lossy audio compression format developed by the Internet Engineering Task Force (IETF) that is particularly suitable for interactive speech and audio transmission over the Internet. This package provides the Opus development library and headers. 
+# URL: http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz
+# Maintainer:
+
+
+NAME=opus
+VERSION=1.1
+
+
+DEPENDS=""
+SOURCES="http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr --disable-static
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

@@ -1,0 +1,35 @@
+# Description: The FreeType2 package contains a library which allows applications to properly render TrueType fonts. 
+# URL: http://downloads.sourceforge.net/freetype/freetype-2.6.tar.bz2
+# Maintainer: 
+
+
+NAME=freetype
+VERSION=2.6
+
+
+DEPENDS=""
+SOURCES="http://downloads.sourceforge.net/freetype/freetype-2.6.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-$VERSION
+	export CPPFLAGS="$CPPFLAGS -I${CLFS_DIR}/usr/include"
+	sed -i  -e "/AUX.*.gxvalid/s@^# @@" \
+        -e "/AUX.*.otvalid/s@^# @@" \
+        modules.cfg 
+	sed -ri -e 's:.*(#.*SUBPIXEL.*) .*:\1:' \
+        include/config/ftoption.h 
+
+	PKG_CONFIG_PATH="" \
+	./configure --prefix=/usr --build=${CLFS_HOST}			\
+		--host=${CLFS_TARGET} \
+		--disable-static
+
+	make -j${NR_JOBS} 
+	make DESTDIR=${PKG} install
+}

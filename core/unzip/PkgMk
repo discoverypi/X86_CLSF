@@ -1,0 +1,28 @@
+# Description: he UnZip package contains ZIP extraction utilities. These are useful for extracting files from ZIP archives. ZIP archives are created with PKZIP or Info-ZIP utilities, primarily in a DOS environment. 
+# URL: http://www.linuxfromscratch.org/blfs/view/svn/general/unzip.html
+# Maintainer:
+
+
+NAME=unzip
+VERSION=60
+
+
+DEPENDS=""
+SOURCES="http://downloads.sourceforge.net/infozip/unzip60.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	convmv -f iso-8859-1 -t cp850 -r --nosmart --notest unzip60/*
+	convmv -f cp866 -t koi8-r -r --nosmart --notest unzip60/*
+	cd unzip60
+	cp ../../../Makefile unix/.
+
+	make -f unix/Makefile generic_gcc
+	make prefix=${PKG}/usr -f unix/Makefile install
+
+}

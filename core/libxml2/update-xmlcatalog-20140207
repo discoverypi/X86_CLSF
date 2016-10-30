@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ ! -d /usr/share/xml ] ; then
+	exit 0
+fi
+
+xmlcatalog --noout --create /usr/share/xml/catalog
+
+for catalog in /usr/share/xml/catalogs/*.xml ; do
+	if [ ! -e "$catalog" ] ; then
+		continue
+	fi
+
+	catalog=`readlink -f "$catalog"`
+
+	xmlcatalog --noout --add "nextCatalog" "" "file://$catalog" /usr/share/xml/catalog
+done

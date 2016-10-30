@@ -1,0 +1,38 @@
+# Description: OMXPlayer is a commandline OMX player for the Raspberry Pi. It was developed as a testbed for the XBMC Raspberry PI implementation and is quite handy to use standalone. 
+# URL: https://github.com/popcornmix/omxplayer/archive/master.tar.gz
+# Maintainer:
+
+
+NAME=omxplayer
+VERSION=master
+
+
+DEPENDS=""
+SOURCES="https://github.com/popcornmix/omxplayer/archive/master.tar.gz"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	export CPPFLAGS="${CPPFLAGS} -I${CLFS_DIR}/usr/include"
+	export CXXFLAGS="${CXXFLAGS} -I${CLFS_DIR}/usr/include"
+	cd omxplayer-master
+	cp ../../../Makefile.ffmpeg .
+	cp ../../../Makefile.include .
+	sed -i '/include Makefile.include/d' Makefile
+	sed -i 's:INCLUDES+=*:&-I/Pi/clfs/opt/vc/include -I/Pi/clfs/opt/vc/include/interface/vcos/pthreads -I/Pi/clfs/opt/vc/include/interface/vmcs_host/linux -I/Pi/clfs/usr/include/freetype2 -I/Pi/clfs/usr/include/dbus-1.0 -I/Pi/clfs/usr/lib/dbus-1.0/include -I/Pi/clfs/usr/include :' Makefile
+	sed -i 's:LDFLAGS+=*:&-L/Pi/clfs/opt/vc/lib -L/Pi/clfs/usr/lib :' Makefile
+	sed -i 's/$(STRIP)/arm-unknown-linux-gnueabi-strip/' Makefile
+	#sed -i '/cp -a ffmpeg_compiled/d' Makefile
+	cp ../../../OMXStreamInfo.cpp .
+
+	make ffmpeg
+read -p "Press [Enter] key to continue"
+	make -j${NR_JOBS}
+	cd ../../pkg
+	tar -xzf ../src/omxplayer-master/omxplayer-dist.tgz
+
+}

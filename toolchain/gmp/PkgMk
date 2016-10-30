@@ -1,0 +1,20 @@
+# Description: Multiple Precision Arithmetic Library
+# URL: http://gmplib.org/
+# Maintainer: 
+
+
+NAME=gmp
+VERSION=6.0.0a
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/${NAME}/${NAME}-${VERSION}.tar.bz2"
+
+
+pkgmain() {
+	cd gmp-6.0.0
+	CPPFLAGS=-fexceptions ABI="" ./configure --prefix=${TOOLCHAIN_DIR} --enable-cxx
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}

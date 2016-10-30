@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# /etc/rc.d/kodi: start/stop kodi
+#
+
+case $1 in
+start)
+        # start remote comtrol daemon
+        mkdir -p /var/run/cc; : > /var/run/cc/in; : > /var/run/cc/out
+        cec-client -d 17 </var/run/cc/in >> /var/run/cc/out &
+        while read line; do echo "$line" | grep -q 'waiting for input' && break ; done < /var/run/cc/out; echo "as" >> /var/run/cc/in
+        sudo -u pi kodi
+
+        ;;
+stop)
+        exec kill -USR1 1
+
+
+        ;;
+restart)
+        $0 stop
+        $0 start
+        ;;
+*)
+        echo "usage: $0 [start|stop|restart]"
+        ;;
+esac
+
+# End of file

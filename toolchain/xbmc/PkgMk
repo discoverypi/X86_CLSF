@@ -1,0 +1,29 @@
+# Description:
+# URL:
+# Maintainer:
+
+
+NAME=xbmc
+VERSION=14.2
+HOST_PKG=1
+
+
+DEPENDS=""
+SOURCES="https://github.com/xbmc/xbmc/archive/14.2-Helix.tar.gz"
+PATCHES="xbmc-14.1-Helix-rpi2-target.patch"
+
+
+pkgmain() {
+	cd xbmc-14.2-Helix
+	patch -Np1 -i ../../../xbmc-14.1-Helix-rpi2-target.patch
+	cd tools/depends
+	./boostrap
+	./configure --with-toolchain=/tools --prefix=/toolsx --host=${CLFS_HOST}
+	cd native/JsonSchemaBuilder
+
+	make -j${NR_JOBS}
+	mkdir ${PKG}/toolsx
+	mkdir ${PKG}/toolsx/bin
+	cp bin/JsonSchemaBuilder ${PKG}/toolsx/bin/.
+
+}

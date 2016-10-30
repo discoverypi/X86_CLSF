@@ -1,0 +1,28 @@
+# Description:
+# URL: http://ftp.x.org/pub/individual/app/xrefresh-1.0.5.tar.bz2
+# Maintainer:
+
+
+NAME=xrefresh
+VERSION=1.0.5
+
+
+DEPENDS=""
+SOURCES="http://ftp.x.org/pub/individual/app/xrefresh-1.0.5.tar.bz2"
+
+
+pkgmain() {
+mkdir ${PKG}/lib64
+ln -s lib64 ${PKG}/lib
+mkdir ${PKG}/usr
+mkdir ${PKG}/usr/lib64
+ln -s lib64 ${PKG}/usr/lib
+	cd ${NAME}-${VERSION}
+	export CPPFLAGS="$CPPFLAGS -I${CLFS_DIR}/usr/include"
+	./configure --build=${CLFS_HOST} --host=${CLFS_TARGET}		\
+		--prefix=/usr 
+
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+
+}

@@ -1,0 +1,25 @@
+# Description: The Bash package contains the Bourne-Again SHell. 
+# URL: http://www.linuxfromscratch.org/lfs/view/development/chapter05/bash.html
+# Maintainer:
+
+
+NAME=bash
+VERSION=4.3.30
+HOST_PKG=1
+
+DEPENDS=""
+SOURCES="http://ftp.gnu.org/gnu/bash/bash-4.3.30.tar.gz"
+PATCHES="bash-4.3.30-upstream_fixes-1.patch"
+
+
+pkgmain() {
+	cd ${NAME}-${VERSION}
+	process_patches
+
+
+	PKG_CONFIG= ./configure --prefix=${TOOLCHAIN_DIR} \
+		--without-bash-malloc \
+		--with-installed-readline
+	make -j${NR_JOBS}
+	make DESTDIR=${PKG} install
+}
